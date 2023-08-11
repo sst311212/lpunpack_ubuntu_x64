@@ -1,78 +1,58 @@
 #!/bin/bash
 
-pushd lib/liblog
-clang -std=c++17 -static \
--I../include \
--DLIBLOG_LOG_TAG=1006 -DSNET_EVENT_LOG_TAG=1397638484 -DANDROID_DEBUGGABLE=0 \
--c log_event_list.cpp log_event_write.cpp logger_name.cpp logger_read.cpp logger_write.cpp logprint.cpp properties.cpp event_tag_map.cpp
-ar rcs ../liblog.a *.o
-rm -r *.o
-popd
-
-pushd lib/zlib
-clang -static \
--I. \
--DHAVE_HIDDEN -DZLIB_CONST -O3 \
--c adler32.c adler32_simd.c compress.c cpu_features.c crc32.c crc32_simd.c crc_folding.c deflate.c gzclose.c gzlib.c gzread.c gzwrite.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c
-ar rcs ../libz.a *.o
-rm -r *.o
+pushd lib/ext4_utils
+clang -std=c++17 -static -I../include \
+-fno-strict-aliasing -D_FILE_OFFSET_BITS=64 -c \
+ext4_utils.cpp wipe.cpp ext4_sb.cpp
+ar rcs ../libext4_utils.a *.o && rm -r *.o
 popd
 
 pushd lib/libbase
-clang -std=gnu++17 -static \
--I../include \
--c abi_compatibility.cpp chrono_utils.cpp cmsg.cpp file.cpp hex.cpp logging.cpp mapped_file.cpp parsebool.cpp parsenetaddress.cpp posix_strerror_r.cpp process.cpp properties.cpp stringprintf.cpp strings.cpp threads.cpp test_utils.cpp errors_unix.cpp
-ar rcs ../libbase.a *.o
-rm -r *.o
-popd
-
-pushd lib/libsparse
-clang -std=c++17 -static \
--I../include \
--c backed_block.cpp output_file.cpp sparse.cpp sparse_crc32.cpp sparse_err.cpp sparse_read.cpp
-ar rcs ../libsparse.a *.o
-rm -r *.o
-popd
-
-pushd lib/fmtlib
-clang -std=c++17 -static \
--I../include \
--c src/format.cc
-ar rcs ../fmtlib.a *.o
-rm -r *.o
-popd
-
-pushd lib/liblp
-clang -std=c++17 -static \
--I../include \
--D_FILE_OFFSET_BITS=64 \
--c builder.cpp super_layout_builder.cpp images.cpp partition_opener.cpp property_fetcher.cpp reader.cpp utility.cpp writer.cpp
-ar rcs ../liblp.a *.o
-rm -r *.o
-popd
-
-pushd lib/ext4_utils
-clang -std=c++17 -static \
--I../include \
--fno-strict-aliasing -D_FILE_OFFSET_BITS=64 \
--c ext4_utils.cpp wipe.cpp ext4_sb.cpp
-ar rcs ../libext4_utils.a *.o
-rm -r *.o
+clang -std=gnu++17 -static -I../include -c \
+abi_compatibility.cpp chrono_utils.cpp cmsg.cpp file.cpp hex.cpp logging.cpp mapped_file.cpp parsebool.cpp parsenetaddress.cpp posix_strerror_r.cpp process.cpp properties.cpp stringprintf.cpp strings.cpp threads.cpp test_utils.cpp errors_unix.cpp
+ar rcs ../libbase.a *.o && rm -r *.o
 popd
 
 pushd lib/libcrypto_utils
-clang -std=c++17 -static \
--I../include \
--c android_pubkey.cpp
-ar rcs ../libcrypto_utils.a *.o
-rm -r *.o
+clang -std=c++17 -static -I../include -c android_pubkey.cpp
+ar rcs ../libcrypto_utils.a *.o && rm -r *.o
+popd
+
+pushd lib/libjsonpb
+clang -std=c++17 -static -I../include -I../protobuf/src -c parse/jsonpb.cpp
+ar rcs ../libjsonpbparse.a *.o && rm -r *.o
+popd
+
+pushd lib/liblog
+clang -std=c++17 -static -I../include \
+-DLIBLOG_LOG_TAG=1006 -DSNET_EVENT_LOG_TAG=1397638484 -DANDROID_DEBUGGABLE=0 -c \
+log_event_list.cpp log_event_write.cpp logger_name.cpp logger_read.cpp logger_write.cpp logprint.cpp properties.cpp event_tag_map.cpp
+ar rcs ../liblog.a *.o && rm -r *.o
+popd
+
+pushd lib/liblp
+clang -std=c++17 -static -I../include \
+-D_FILE_OFFSET_BITS=64 -c \
+builder.cpp super_layout_builder.cpp images.cpp partition_opener.cpp property_fetcher.cpp reader.cpp utility.cpp writer.cpp
+ar rcs ../liblp.a *.o && rm -r *.o
+popd
+
+pushd lib/libsparse
+clang -std=c++17 -static -I../include -c \
+backed_block.cpp output_file.cpp sparse.cpp sparse_crc32.cpp sparse_err.cpp sparse_read.cpp
+ar rcs ../libsparse.a *.o && rm -r *.o
+popd
+
+pushd lib/zlib
+clang -static -I. \
+-DHAVE_HIDDEN -DZLIB_CONST -O3 -c \
+adler32.c adler32_simd.c compress.c cpu_features.c crc32.c crc32_simd.c crc_folding.c deflate.c gzclose.c gzlib.c gzread.c gzwrite.c infback.c inffast.c inflate.c inftrees.c trees.c uncompr.c zutil.c
+ar rcs ../libz.a *.o && rm -r *.o
 popd
 
 pushd lib/boringssl
-clang -static \
--I../include \
--DBORINGSSL_IMPLEMENTATION -fvisibility=hidden -DBORINGSSL_SHARED_LIBRARY -DBORINGSSL_ANDROID_SYSTEM -DOPENSSL_SMALL -D_XOPEN_SOURCE=700 \
--c \
+clang -static -I../include \
+-DBORINGSSL_IMPLEMENTATION -fvisibility=hidden -DBORINGSSL_SHARED_LIBRARY -DBORINGSSL_ANDROID_SYSTEM -DOPENSSL_SMALL -D_XOPEN_SOURCE=700 -c \
 err_data.c \
 src/crypto/asn1/a_bitstr.c \
 src/crypto/asn1/a_bool.c \
@@ -325,15 +305,11 @@ src/crypto/hrss/asm/poly_rq_mul.S \
 src/crypto/poly1305/poly1305_arm_asm.S \
 src/third_party/fiat/asm/fiat_curve25519_adx_mul.S \
 src/third_party/fiat/asm/fiat_curve25519_adx_square.S
-ar rcs ../libcrypto.a *.o
-rm -r *.o
+ar rcs ../libcrypto.a *.o && rm -r *.o
 popd
 
 pushd lib/protobuf
-clang -std=c++17 -static \
--Isrc -Iandroid \
--DHAVE_ZLIB=1 \
--c \
+clang -std=c++17 -static -Isrc -Iandroid -DHAVE_ZLIB=1 -c \
 src/google/protobuf/any_lite.cc \
 src/google/protobuf/arena.cc \
 src/google/protobuf/arenastring.cc \
@@ -418,14 +394,5 @@ src/google/protobuf/util/time_util.cc \
 src/google/protobuf/util/type_resolver_util.cc \
 src/google/protobuf/wire_format.cc \
 src/google/protobuf/wrappers.pb.cc
-ar rcs ../libprotobuf-cpp-full.a *.o
-rm -r *.o
-popd
-
-pushd lib/libjsonpb
-clang -std=c++17 -static \
--I../include -I../protobuf/src \
--c parse/jsonpb.cpp
-ar rcs ../libjsonpbparse.a *.o
-rm -r *.o
+ar rcs ../libprotobuf-cpp-full.a *.o && rm -r *.o
 popd

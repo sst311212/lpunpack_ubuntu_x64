@@ -1,37 +1,27 @@
 #!/bin/bash
 
-clang++ -std=c++17 -static \
--Ilib/include -D_FILE_OFFSET_BITS=64 -lpthread \
-partition_tools/lpadd.cc \
-lib/liblp.a lib/libsparse.a lib/libbase.a lib/liblog.a lib/fmtlib.a lib/libext4_utils.a lib/libcrypto_utils.a lib/libcrypto.a lib/libz.a \
--o lpadd
+LIBS="lib/liblp.a lib/libsparse.a lib/libbase.a lib/liblog.a lib/libext4_utils.a lib/libcrypto_utils.a lib/libcrypto.a lib/libz.a"
 
 clang++ -std=c++17 -static \
--Ilib/include -D_FILE_OFFSET_BITS=64 -lpthread \
-partition_tools/lpflash.cc \
-lib/liblp.a lib/libsparse.a lib/libbase.a lib/liblog.a lib/fmtlib.a lib/libext4_utils.a lib/libcrypto_utils.a lib/libcrypto.a lib/libz.a \
--o lpflash
+-Ilib/include -D_FILE_OFFSET_BITS=64 -o lpadd \
+partition_tools/lpadd.cc $LIBS
 
 clang++ -std=c++17 -static \
--Ilib/include -D_FILE_OFFSET_BITS=64 -lpthread \
-partition_tools/lpmake.cc \
-lib/liblp.a lib/libsparse.a lib/libbase.a lib/liblog.a lib/fmtlib.a lib/libext4_utils.a lib/libcrypto_utils.a lib/libcrypto.a lib/libz.a \
--o lpmake
+-Ilib/include -D_FILE_OFFSET_BITS=64 -o lpflash \
+partition_tools/lpflash.cc $LIBS
 
 clang++ -std=c++17 -static \
--Ilib/include -D_FILE_OFFSET_BITS=64 -lpthread \
-partition_tools/lpunpack.cc \
-lib/liblp.a lib/libsparse.a lib/libbase.a lib/liblog.a lib/fmtlib.a lib/libext4_utils.a lib/libcrypto_utils.a lib/libcrypto.a lib/libz.a \
--o lpunpack
+-Ilib/include -D_FILE_OFFSET_BITS=64 -o lpmake \
+partition_tools/lpmake.cc $LIBS
 
 clang++ -std=c++17 -static \
--Ilib/include -Ilib/protobuf/src -D_FILE_OFFSET_BITS=64 -lpthread \
+-Ilib/include -D_FILE_OFFSET_BITS=64 -o lpunpack \
+partition_tools/lpunpack.cc $LIBS
+
+clang++ -std=c++17 -static \
+-Ilib/include -Ilib/protobuf/src -D_FILE_OFFSET_BITS=64 -o lpdump \
 partition_tools/lpdump.cc partition_tools/dynamic_partitions_device_info.pb.cc partition_tools/lpdump_host.cc \
-lib/liblp.a lib/libsparse.a lib/libbase.a lib/liblog.a lib/fmtlib.a lib/libext4_utils.a lib/libcrypto_utils.a lib/libcrypto.a lib/libz.a lib/libjsonpbparse.a lib/libprotobuf-cpp-full.a \
--o lpdump
+$LIBS lib/libjsonpbparse.a lib/libprotobuf-cpp-full.a
 
-strip -s lpadd
-strip -s lpflash
-strip -s lpmake
-strip -s lpunpack
-strip -s lpdump
+strip -s lp*
+chmod +x lp*
